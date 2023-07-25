@@ -1,0 +1,40 @@
+{
+    "name": "yii1tech/di",
+    "description": "Provides Dependency Injection support for Yii1 application",
+    "keywords": ["yii1", "psr", "container", "di", "dependency", "injection"],
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/yii1tech/di/issues",
+        "wiki": "https://github.com/yii1tech/di/wiki",
+        "source": "https://github.com/yii1tech/di"
+    },
+    "authors": [
+        {
+            "name": "Paul Klimov",
+            "email": "klimov.paul@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "yiisoft/yii": "~1.1.0",
+        "psr/container": ">=1.0.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0 || ^7.0 || ^8.0 || ^9.3 || ^10.0.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "yii1tech\\di\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "yii1tech\\di\\test\\": "tests"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
