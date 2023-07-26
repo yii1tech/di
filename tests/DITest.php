@@ -2,9 +2,12 @@
 
 namespace yii1tech\di\test;
 
+use Psr\Container\ContainerInterface;
 use yii1tech\di\Container;
 use yii1tech\di\DI;
 use yii1tech\di\Injector;
+use yii1tech\di\InjectorContract;
+use yii1tech\di\test\support\Dummy;
 
 class DITest extends TestCase
 {
@@ -26,5 +29,47 @@ class DITest extends TestCase
 
         $this->assertSame($injector, DI::getInjector());
         $this->assertSame(DI::getInjector(), DI::injector());
+    }
+
+    /**
+     * @depends testSetupContainer
+     * @depends testSetupInjector
+     */
+    public function testGetDefaults(): void
+    {
+        $container = DI::container();
+
+        $this->assertTrue($container instanceof ContainerInterface);
+
+        $injector = DI::getInjector();
+
+        $this->assertTrue($injector instanceof InjectorContract);
+    }
+
+    /**
+     * @depends testGetDefaults
+     */
+    public function testMake(): void
+    {
+        $object = DI::make(Dummy::class);
+
+        $this->assertTrue($object instanceof Dummy);
+
+        $object = DI::make(Dummy::class, ['foo' => 'bar']);
+
+        $this->assertTrue($object instanceof Dummy);
+        $this->assertSame('bar', $object->constructorArgs[0]);
+    }
+
+    /**
+     * @depends testGetDefaults
+     */
+    public function testInvoke(): void
+    {
+        $result = DI::invoke([Dummy::class, 'returnArguments']);
+        $this->assertSame('default', $result[0]);
+
+        $result = DI::invoke([Dummy::class, 'returnArguments'], ['foo' => 'bar']);
+        $this->assertSame('bar', $result[0]);
     }
 }

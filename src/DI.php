@@ -19,6 +19,10 @@ class DI
      */
     private static $injector;
 
+    /**
+     * @param \Psr\Container\ContainerInterface|callable|null $container PSR compatible container or a callback, which instantiates it.
+     * @return static self reference, can be used to chain methods calls.
+     */
     public static function setContainer($container): self
     {
         self::$container = $container;

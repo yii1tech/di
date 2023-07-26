@@ -5,6 +5,10 @@ namespace yii1tech\di;
 use Psr\Container\ContainerInterface;
 
 /**
+ * InjectorContract defines the interface for dependency injector.
+ *
+ * Injector should be able to analyze callable dependencies based on type hinting and inject them from any PSR-11 compatible container.
+ *
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
  */
