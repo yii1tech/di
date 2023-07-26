@@ -29,7 +29,7 @@ class DI
     public static function getContainer(): ContainerInterface
     {
         if (self::$container === null) {
-            throw new \LogicException('"' . get_called_class() . '::$container" has not been configured.');
+            self::$container = new Container();
         }
 
         if (!is_object(self::$container) || !self::$container instanceof ContainerInterface) {
@@ -49,7 +49,7 @@ class DI
     public static function getInjector(): InjectorContract
     {
         if (self::$injector === null) {
-            throw new \LogicException('"' . get_called_class() . '::injector" has not been configured.');
+            self::$injector = new Injector();
         }
 
         if (!is_object(self::$injector) || !self::$injector instanceof InjectorContract) {

@@ -4,6 +4,10 @@ namespace yii1tech\di;
 
 use Psr\Container\ContainerInterface;
 
+/**
+ * @author Paul Klimov <klimov.paul@gmail.com>
+ * @since 1.0
+ */
 class Container implements ContainerInterface
 {
     /**
@@ -41,6 +45,14 @@ class Container implements ContainerInterface
             return $this->instances[$id];
         }
 
+        if ($id === get_class($this)) {
+            return $this;
+        }
+
+        if ($id === ContainerInterface::class) {
+            return $this;
+        }
+
         throw new DefinitionNotFoundException("Missing DI definition for: {$id}");
     }
 
@@ -61,9 +73,22 @@ class Container implements ContainerInterface
             return true;
         }
 
+        if ($id === get_class($this)) {
+            return true;
+        }
+
+        if ($id === ContainerInterface::class) {
+            return true;
+        }
+
         return false;
     }
 
+    /**
+     * @param string $id identifier of the entry.
+     * @param mixed $object entry instance.
+     * @return static self reference.
+     */
     public function instance(string $id, $object): self
     {
         $this->instances[$id] = $object;
@@ -71,6 +96,11 @@ class Container implements ContainerInterface
         return $this;
     }
 
+    /**
+     * @param string $id identifier of the entry.
+     * @param callable $callable entry resolution callback.
+     * @return static self reference.
+     */
     public function lazy(string $id, callable $callable): self
     {
         $this->definitions[$id] = $callable;
@@ -78,6 +108,11 @@ class Container implements ContainerInterface
         return $this;
     }
 
+    /**
+     * @param string $id identifier of the entry.
+     * @param callable $callable entry resolution callback.
+     * @return static self reference.
+     */
     public function factory(string $id, callable $callable): self
     {
         $this->factories[$id] = $callable;

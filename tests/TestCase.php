@@ -5,6 +5,7 @@ namespace yii1tech\di\test;
 use CConsoleApplication;
 use CMap;
 use Yii;
+use yii1tech\di\DI;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
@@ -14,6 +15,9 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        DI::setContainer(null);
+        DI::setInjector(null);
 
         $this->mockApplication();
     }
