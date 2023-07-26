@@ -48,7 +48,7 @@ class Injector implements InjectorContract
             return new $class();
         }
 
-        return new $class(...$this->resolveDependencies($container, $reflection, $arguments));
+        return $classReflection->newInstanceArgs($this->resolveDependencies($container, $reflection, $arguments));
     }
 
     /**
