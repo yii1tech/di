@@ -1,6 +1,6 @@
 <?php
 
-namespace yii1tech\di\yii;
+namespace yii1tech\di\base;
 
 use IApplicationComponent;
 use yii1tech\di\DI;

@@ -1,6 +1,6 @@
 <?php
 
-namespace yii1tech\di\test\yii;
+namespace web;
 
 use CDummyCache;
 use ICache;
@@ -9,7 +9,7 @@ use yii1tech\di\Container;
 use yii1tech\di\DI;
 use yii1tech\di\test\support\controllers\NamespaceController;
 use yii1tech\di\test\TestCase;
-use yii1tech\di\yii\WebApplication;
+use yii1tech\di\web\WebApplication;
 
 class WebApplicationTest extends TestCase
 {

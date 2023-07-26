@@ -1,6 +1,8 @@
 <?php
 
-namespace yii1tech\di\yii;
+namespace yii1tech\di\console;
+
+use yii1tech\di\base\ResolvesComponentViaDI;
 
 /**
  * {@inheritdoc}
