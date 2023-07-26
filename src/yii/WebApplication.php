@@ -8,5 +8,5 @@ namespace yii1tech\di\yii;
 class WebApplication extends \CWebApplication
 {
     use ResolvesComponentViaDI;
-    use CreatesControllerViaDI;
+    use ResolvesControllerViaDI;
 }

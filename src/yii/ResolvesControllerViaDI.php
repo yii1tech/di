@@ -16,7 +16,7 @@ use yii1tech\di\DI;
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
  */
-trait CreatesControllerViaDI
+trait ResolvesControllerViaDI
 {
     /**
      * {@inheritdoc}
