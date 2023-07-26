@@ -11,6 +11,9 @@ use yii1tech\di\DI;
  * It also allows usage of arbitrary (without implementation of {@see \IApplicationComponent}) classes for the components.
  *
  * @mixin \CModule
+ *
+ * @author Paul Klimov <klimov.paul@gmail.com>
+ * @since 1.0
  */
 trait ResolvesComponentViaDI
 {
