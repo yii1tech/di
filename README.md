@@ -41,7 +41,7 @@ Usage
 This extension provides Dependency Injection support for Yii1 application.
 
 
-## Conatiner Setup <span id="conatiner-setup"></span>
+## Container Setup <span id="conatiner-setup"></span>
 
 
 ## Dependency Injection in Web Application <span id="di-in-web-application"></span>
