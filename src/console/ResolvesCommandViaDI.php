@@ -50,6 +50,11 @@ trait ResolvesCommandViaDI
         if (is_string($command)) { // class file path or alias
             if (strpos($command, '/') !== false || strpos($command, '\\') !== false) {
                 $className = substr(basename($command), 0, -4);
+
+                if (isset($this->commandNamespace)) {
+                    $className = $this->commandNamespace . '\\' . $className;
+                }
+
                 if (!class_exists($className, false)) {
                     require_once($command);
                 }
@@ -64,6 +69,10 @@ trait ResolvesCommandViaDI
         }
 
         // an array configuration
+        if (isset($this->commandNamespace) && isset($command['class'])) {
+            $command['class'] = $this->commandNamespace . '\\' . $command['class'];
+        }
+
         return DI::create($command, [
             'name' => $name,
             'runner' => $this,

@@ -14,4 +14,10 @@ class ConsoleApplication extends \CConsoleApplication
 {
     use ResolvesComponentViaDI;
     use ResolvesCommandRunnerViaDI;
+
+    /**
+     * @var string|null namespace that should be used when loading commands.
+     * Default is to use global namespace.
+     */
+    public $commandNamespace;
 }

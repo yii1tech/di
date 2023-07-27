@@ -9,6 +9,7 @@ use Yii;
 use yii1tech\di\console\ConsoleCommandRunner;
 use yii1tech\di\Container;
 use yii1tech\di\DI;
+use yii1tech\di\test\support\commands\NamespaceCommand;
 use yii1tech\di\test\support\ConsoleApplication;
 use yii1tech\di\test\TestCase;
 
@@ -94,6 +95,29 @@ class ConsoleApplicationTest extends TestCase
 
         $this->assertTrue(isset($GLOBALS['args']));
         $this->assertEquals([$id], $GLOBALS['args']);
+    }
+
+    /**
+     * @depends testCreateCommand
+     */
+    public function testCreateControllerByNamespace(): void
+    {
+        Yii::app()->commandNamespace = 'yii1tech\di\test\support\commands';
+
+        $_SERVER['argv'] = ['yiic', 'namespace'];
+
+        Yii::app()->run();
+
+        $this->assertTrue(isset($GLOBALS['command']));
+
+        /** @var \PlainCommand $command */
+        $command = $GLOBALS['command'];
+        $this->assertTrue($command instanceof NamespaceCommand);
+
+        $this->assertTrue($command->cache instanceof ICache);
+        $this->assertSame('actionIndex', $GLOBALS['method']);
+        $this->assertSame('namespace', $command->name);
+        $this->assertTrue($command->getCommandRunner() instanceof ConsoleCommandRunner);
     }
 
     /**
