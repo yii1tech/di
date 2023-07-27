@@ -55,6 +55,36 @@ class ConsoleApplicationTest extends TestCase
         $this->assertTrue($command->getCommandRunner() instanceof ConsoleCommandRunner);
     }
 
+    public function testCreateCommandByMap(): void
+    {
+        $this->mockApplication(
+            [
+                'commandPath' => __DIR__,
+                'commandMap' => [
+                    'namespace' => [
+                        'class' => NamespaceCommand::class,
+                    ],
+                ],
+            ],
+            ConsoleApplication::class
+        );
+
+        $_SERVER['argv'] = ['yiic', 'namespace'];
+
+        Yii::app()->run();
+
+        $this->assertTrue(isset($GLOBALS['command']));
+        $this->assertTrue(isset($GLOBALS['method']));
+
+        /** @var \PlainCommand $command */
+        $command = $GLOBALS['command'];
+        $this->assertTrue($command instanceof NamespaceCommand);
+        $this->assertTrue($command->cache instanceof ICache);
+        $this->assertSame('actionIndex', $GLOBALS['method']);
+        $this->assertSame('namespace', $command->name);
+        $this->assertTrue($command->getCommandRunner() instanceof ConsoleCommandRunner);
+    }
+
     /**
      * @depends testCreateCommand
      */

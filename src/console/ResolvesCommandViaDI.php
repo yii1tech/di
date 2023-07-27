@@ -68,11 +68,6 @@ trait ResolvesCommandViaDI
             ]);
         }
 
-        // an array configuration
-        if (isset($this->commandNamespace) && isset($command['class'])) {
-            $command['class'] = $this->commandNamespace . '\\' . $command['class'];
-        }
-
         return DI::create($command, [
             'name' => $name,
             'runner' => $this,
