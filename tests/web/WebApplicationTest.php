@@ -1,6 +1,6 @@
 <?php
 
-namespace web;
+namespace yii1tech\di\test\web;
 
 use CDummyCache;
 use CFormatter;
@@ -35,19 +35,6 @@ class WebApplicationTest extends TestCase
         $container->instance(CFormatter::class, new CFormatter());
 
         DI::setContainer($container);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function tearDown(): void
-    {
-        unset($GLOBALS['controller']);
-        unset($GLOBALS['method']);
-
-        $_GET = [];
-
-        parent::tearDown();
     }
 
     public function testCreateController(): void

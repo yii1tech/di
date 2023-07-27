@@ -5,12 +5,16 @@ namespace yii1tech\di\web;
 use yii1tech\di\DI;
 
 /**
+ * ResolvesActionViaDI allows dependency injection at the controller action level.
+ *
+ * It analyzes action's method signature and passes entities from the PSR compatible container based on type-hinting.
+ *
  * @mixin \CController
  *
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
  */
-trait CreatesActionViaDI
+trait ResolvesActionViaDI
 {
     /**
      * {@inheritdoc}

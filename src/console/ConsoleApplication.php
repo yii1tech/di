@@ -13,4 +13,5 @@ use yii1tech\di\base\ResolvesComponentViaDI;
 class ConsoleApplication extends \CConsoleApplication
 {
     use ResolvesComponentViaDI;
+    use ResolvesCommandRunnerViaDI;
 }

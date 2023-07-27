@@ -1,6 +1,6 @@
 <?php
 
-namespace yii1tech\di\web;
+namespace yii1tech\di\console;
 
 /**
  * {@inheritdoc}
@@ -8,7 +8,7 @@ namespace yii1tech\di\web;
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
  */
-class Controller extends \CController
+class ConsoleCommand extends \CConsoleCommand
 {
     use ResolvesActionViaDI;
 }
