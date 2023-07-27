@@ -116,4 +116,49 @@ trait ResolvesActionViaDI
 
         return $exitCode;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOptionHelp()
+    {
+        $options = [];
+        $class = new ReflectionClass(get_class($this));
+
+        foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            $name = $method->getName();
+            if (!strncasecmp($name, 'action', 6) && strlen($name) > 6) {
+                $name = substr($name, 6);
+                $name[0] = strtolower($name[0]);
+                $help = $name;
+
+                foreach ($method->getParameters() as $param) {
+                    if ($param->hasType() && !$param->getType()->isBuiltin()) {
+                        continue;
+                    }
+
+                    $optional = $param->isDefaultValueAvailable();
+                    $defaultValue = $optional ? $param->getDefaultValue() : null;
+                    if (is_array($defaultValue)) {
+                        $defaultValue = str_replace(["\r\n", "\n", "\r"], '', print_r($defaultValue, true));
+                    }
+                    $name = $param->getName();
+
+                    if ($name === 'args') {
+                        continue;
+                    }
+
+                    if ($optional) {
+                        $help .= " [--$name=$defaultValue]";
+                    } else {
+                        $help .= " --$name=value";
+                    }
+                }
+
+                $options[] = $help;
+            }
+        }
+
+        return $options;
+    }
 }

@@ -75,4 +75,42 @@ class ConsoleApplicationTest extends TestCase
         $this->assertTrue(isset($GLOBALS['id']));
         $this->assertEquals($id, $GLOBALS['id']);
     }
+
+    /**
+     * @depends testCreateCommand
+     */
+    public function testRunActionCatchingAllArgs(): void
+    {
+        $id = 123;
+        $_SERVER['argv'] = ['yiic', 'plain', 'all', $id];
+
+        Yii::app()->run();
+
+        $this->assertTrue(isset($GLOBALS['command']));
+
+        /** @var \PlainCommand $command */
+        $command = $GLOBALS['command'];
+        $this->assertTrue($command instanceof \PlainCommand);
+
+        $this->assertTrue(isset($GLOBALS['args']));
+        $this->assertEquals([$id], $GLOBALS['args']);
+    }
+
+    /**
+     * @depends testCreateCommand
+     */
+    public function testGetHelp(): void
+    {
+        /** @var \PlainCommand $command */
+        $command = DI::make(\PlainCommand::class, [
+            'name' => 'plain',
+            'runner' => new ConsoleCommandRunner(),
+        ]);
+
+        $help = $command->getHelp();
+
+        $this->assertStringContainsString('index', $help);
+        $this->assertStringContainsString('format --id=value', $help);
+        $this->assertStringNotContainsString('formatter', $help);
+    }
 }

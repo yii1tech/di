@@ -35,4 +35,11 @@ class PlainCommand extends ConsoleCommand
 
         $this->formatter = $formatter;
     }
+
+    public function actionAll(array $args = []): void
+    {
+        $GLOBALS['command'] = $this;
+        $GLOBALS['method'] = __FUNCTION__;
+        $GLOBALS['args'] = $args;
+    }
 }
