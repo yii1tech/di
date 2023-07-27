@@ -29,6 +29,10 @@ class Container implements ContainerInterface
      */
     private $autowires = [];
     /**
+     * @var array<string, array> dictionary of instance Yii-style configurations.
+     */
+    private $configs = [];
+    /**
      * @var array<string, string> list of entity IDs, which currently in resolution.
      * Used to track circular dependencies.
      */
@@ -82,6 +86,25 @@ class Container implements ContainerInterface
             return $this->instances[$id];
         }
 
+        if (isset($this->configs[$id])) {
+            $config = $this->configs[$id];
+
+            if (!isset($config['class'])) {
+                $config['class'] = $id;
+            }
+
+            $object = \YiiBase::createComponent($config);
+            if ($object instanceof \IApplicationComponent) {
+                $object->init();
+            }
+
+            $this->instances[$id] = $object;
+
+            unset($this->configs[$id]);
+
+            return $this->instances[$id];
+        }
+
         if ($id === get_class($this)) {
             return $this;
         }
@@ -111,6 +134,10 @@ class Container implements ContainerInterface
         }
 
         if (isset($this->autowires[$id])) {
+            return true;
+        }
+
+        if (isset($this->configs[$id])) {
             return true;
         }
 
@@ -238,6 +265,29 @@ class Container implements ContainerInterface
     public function autowire(string $id, ?string $class = null): self
     {
         $this->autowires[$id] = $class ?? $id;
+
+        return $this;
+    }
+
+    /**
+     * Specifies binding as Yii-style component configuration.
+     * If bound entity is {@see \IApplicationComponent} instance, its `init()` method will be invoked automatically.
+     * This method provides easy way of moving existing component declarations from Service Locator to DI Container.
+     * For example:
+     *
+     * ```php
+     * $container->config(CDbConnection::class, [
+     *     'connectionString' => 'sqlite::memory:',
+     * ]);
+     * ```
+     *
+     * @param string $id identifier of the entry.
+     * @param array<string, mixed> $config object configuration.
+     * @return static self reference.
+     */
+    public function config(string $id, array $config = []): self
+    {
+        $this->configs[$id] = $config;
 
         return $this;
     }

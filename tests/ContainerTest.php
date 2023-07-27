@@ -82,6 +82,23 @@ class ContainerTest extends TestCase
         $this->assertSame($container->get(ICache::class), $object->constructorArgs[1]);
     }
 
+    public function testConfig(): void
+    {
+        $container = new Container();
+
+        $container->config(CDbConnection::class, [
+            'username' => 'test-user',
+            'autoConnect' => false,
+        ]);
+
+        $this->assertTrue($container->has(CDbConnection::class));
+
+        $object = $container->get(CDbConnection::class);
+        $this->assertTrue($object instanceof CDbConnection);
+        $this->assertSame('test-user', $object->username);
+        $this->assertTrue($object->getIsInitialized());
+    }
+
     public function testGetSelf(): void
     {
         $container = new Container();
