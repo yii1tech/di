@@ -2,8 +2,6 @@
 
 namespace yii1tech\di\web;
 
-use CException;
-use Yii;
 use yii1tech\di\DI;
 
 /**
@@ -107,25 +105,9 @@ trait ResolvesControllerViaDI
      */
     protected function instantiateController($config, $id, $module)
     {
-        if (is_string($config)) {
-            $className = $config;
-            $config = [];
-        } elseif (isset($config['class'])) {
-            $className = $config['class'];
-            unset($config['class']);
-        } else {
-            throw new CException(Yii::t('yii', 'Object configuration must be an array containing a "class" element.'));
-        }
-
-        $controller = DI::make($className, [
+        return DI::create($config, [
             'id' => $id,
             'module' => $module,
         ]);
-
-        foreach ($config as $name => $value) {
-            $controller->$name = $value;
-        }
-
-        return $controller;
     }
 }

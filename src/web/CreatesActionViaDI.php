@@ -2,8 +2,6 @@
 
 namespace yii1tech\di\web;
 
-use CException;
-use Yii;
 use yii1tech\di\DI;
 
 /**
@@ -41,23 +39,10 @@ trait CreatesActionViaDI
                 $config
             );
 
-            if (isset($config['class'])) {
-                $class = $config['class'];
-                unset($config['class']);
-            } else {
-                throw new CException(Yii::t('yii', 'Object configuration must be an array containing a "class" element.'));
-            }
-
-            $action = DI::make($class, [
+            return DI::create($config, [
                 'controller' => $this,
                 'id' => $requestActionID,
             ]);
-
-            foreach ($config as $name => $value) {
-                $action->$name = $value;
-            }
-
-            return $action;
         }
 
         return parent::createActionFromMap($actionMap, $actionID, $requestActionID, $config);

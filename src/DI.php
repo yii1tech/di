@@ -2,7 +2,9 @@
 
 namespace yii1tech\di;
 
+use CException;
 use Psr\Container\ContainerInterface;
+use Yii;
 
 /**
  * DI is a facade for global access to PSR compatible container and injector.
@@ -104,15 +106,28 @@ class DI
     }
 
     /**
-     * Creates an object of a given class with resolving constructor dependencies based on parameter types.
+     * Finds an entry of the decorated container by its identifier and returns it.
      *
-     * @param string $class class name.
-     * @param array $arguments list of constructor arguments.
-     * @return mixed created class instance.
+     * @param string $id identifier of the entry to look for.
+     * @return mixed entry.
+     * @throws \Psr\Container\ContainerExceptionInterface no entry was found for **this** identifier.
+     * @throws \Psr\Container\NotFoundExceptionInterface error while retrieving the entry.
      */
-    public static function make(string $class, array $arguments = [])
+    public static function get(string $id)
     {
-        return static::injector()->make(static::container(), $class, $arguments);
+        return static::container()->get($id);
+    }
+
+    /**
+     * Returns `true` if the decorated container can return an entry for the given identifier.
+     * Returns `false` otherwise.
+     *
+     * @param string $id identifier of the entry to look for.
+     * @return bool whether entry with given id exists or not.
+     */
+    public static function has(string $id): bool
+    {
+        return static::container()->has($id);
     }
 
     /**
@@ -125,5 +140,47 @@ class DI
     public static function invoke(callable $callable, array $arguments = [])
     {
         return static::injector()->invoke(static::container(), $callable, $arguments);
+    }
+
+    /**
+     * Creates an object of a given class with resolving constructor dependencies based on parameter types.
+     *
+     * @param string $class class name.
+     * @param array $arguments list of constructor arguments.
+     * @return mixed created class instance.
+     */
+    public static function make(string $class, array $arguments = [])
+    {
+        return static::injector()->make(static::container(), $class, $arguments);
+    }
+
+    /**
+     * Creates an object from the Yii-style configuration with resolving constructor dependencies based on parameter types.
+     * @see \YiiBase::createComponent()
+     *
+     * @param array|string $config the configuration. It can be either a string or an array.
+     * @param array $arguments list of constructor arguments.
+     * @return mixed the created object.
+     * @throws \CException on invalid configuration.
+     */
+    public static function create($config, array $arguments = [])
+    {
+        if (is_string($config)) {
+            $class = $config;
+            $config = [];
+        } elseif (isset($config['class'])) {
+            $class = $config['class'];
+            unset($config['class']);
+        } else {
+            throw new CException(Yii::t('yii', 'Object configuration must be an array containing a "class" element.'));
+        }
+
+        $object = static::make($class, $arguments);
+
+        foreach ($config as $name => $value) {
+            $object->$name = $value;
+        }
+
+        return $object;
     }
 }

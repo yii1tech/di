@@ -3,6 +3,7 @@
 namespace yii1tech\di\test;
 
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use yii1tech\di\Container;
 use yii1tech\di\DI;
 use yii1tech\di\Injector;
@@ -49,6 +50,18 @@ class DITest extends TestCase
     /**
      * @depends testGetDefaults
      */
+    public function testInvoke(): void
+    {
+        $result = DI::invoke([Dummy::class, 'returnArguments']);
+        $this->assertSame('default', $result[0]);
+
+        $result = DI::invoke([Dummy::class, 'returnArguments'], ['foo' => 'bar']);
+        $this->assertSame('bar', $result[0]);
+    }
+
+    /**
+     * @depends testGetDefaults
+     */
     public function testMake(): void
     {
         $object = DI::make(Dummy::class);
@@ -62,14 +75,57 @@ class DITest extends TestCase
     }
 
     /**
-     * @depends testGetDefaults
+     * @depends testMake
      */
-    public function testInvoke(): void
+    public function testCreate(): void
     {
-        $result = DI::invoke([Dummy::class, 'returnArguments']);
-        $this->assertSame('default', $result[0]);
+        $object = DI::create(Dummy::class);
 
-        $result = DI::invoke([Dummy::class, 'returnArguments'], ['foo' => 'bar']);
-        $this->assertSame('bar', $result[0]);
+        $this->assertTrue($object instanceof Dummy);
+
+        $object = DI::create([
+            'class' => Dummy::class,
+            'name' => 'test',
+        ]);
+
+        $this->assertTrue($object instanceof Dummy);
+        $this->assertSame('test', $object->name);
+
+        $object = DI::make(Dummy::class, ['foo' => 'bar']);
+
+        $this->assertTrue($object instanceof Dummy);
+        $this->assertSame('bar', $object->constructorArgs[0]);
+    }
+
+    /**
+     * @depends testSetupContainer
+     */
+    public function testHas(): void
+    {
+        $container = new Container();
+        $container->instance(Dummy::class, new Dummy());
+
+        DI::setContainer($container);
+
+        $this->assertTrue(DI::has(Dummy::class));
+        $this->assertFalse(DI::has('Unexisting\\Class'));
+    }
+
+    /**
+     * @depends testSetupContainer
+     */
+    public function testGet(): void
+    {
+        $container = new Container();
+        $object = new Dummy();
+        $container->instance(Dummy::class, $object);
+
+        DI::setContainer($container);
+
+        $this->assertSame($object, DI::get(Dummy::class));
+
+        $this->expectException(NotFoundExceptionInterface::class);
+
+        DI::get('Unexisting\\Class');
     }
 }

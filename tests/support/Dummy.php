@@ -6,6 +6,8 @@ class Dummy
 {
     public $constructorArgs = [];
 
+    public $name = 'default';
+
     public function __construct($foo = 'default')
     {
         $this->constructorArgs = func_get_args();
