@@ -3,9 +3,14 @@
 namespace yii1tech\di\test;
 
 use ArrayObject;
+use CDbConnection;
+use CDummyCache;
+use ICache;
 use Psr\Container\ContainerInterface;
+use yii1tech\di\CircularDependencyException;
 use yii1tech\di\Container;
 use yii1tech\di\DefinitionNotFoundException;
+use yii1tech\di\test\support\DummyWithDependency;
 
 class ContainerTest extends TestCase
 {
@@ -58,6 +63,25 @@ class ContainerTest extends TestCase
         $this->assertNotSame($object, $container->get(ArrayObject::class));
     }
 
+    /**
+     * @depends testInstance
+     */
+    public function testAutowire(): void
+    {
+        $container = new Container();
+        $container->instance(CDbConnection::class, new CDbConnection());
+        $container->instance(ICache::class, new CDummyCache());
+
+        $container->autowire(DummyWithDependency::class);
+
+        $this->assertTrue($container->has(DummyWithDependency::class));
+
+        $object = $container->get(DummyWithDependency::class);
+        $this->assertTrue($object instanceof DummyWithDependency);
+        $this->assertSame($container->get(CDbConnection::class), $object->constructorArgs[0]);
+        $this->assertSame($container->get(ICache::class), $object->constructorArgs[1]);
+    }
+
     public function testGetSelf(): void
     {
         $container = new Container();
@@ -78,5 +102,29 @@ class ContainerTest extends TestCase
         $this->expectException(DefinitionNotFoundException::class);
 
         $object = $container->get(ArrayObject::class);
+    }
+
+    /**
+     * @depends testLazy
+     */
+    public function testCircularDependency(): void
+    {
+        $container = new Container();
+
+        $container->lazy('one', function (Container $container) {
+            return $container->get('two');
+        });
+
+        $container->lazy('two', function (Container $container) {
+            return $container->get('three');
+        });
+
+        $container->lazy('three', function (Container $container) {
+            return $container->get('one');
+        });
+
+        $this->expectException(CircularDependencyException::class);
+
+        $container->get('one');
     }
 }

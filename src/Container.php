@@ -13,24 +13,52 @@ use Psr\Container\ContainerInterface;
 class Container implements ContainerInterface
 {
     /**
-     * @var array<string, object> list of instances.
+     * @var array<string, object> dictionary of instances.
      */
     private $instances = [];
-
     /**
-     * @var array<string, callable> list of instance definition callbacks.
+     * @var array<string, callable> dictionary of instance definition callbacks.
      */
     private $definitions = [];
-
     /**
-     * @var array<string, callable> list of instance factory callbacks.
+     * @var array<string, callable> dictionary of instance factory callbacks.
      */
     private $factories = [];
+    /**
+     * @var array<string, callable> dictionary of instance auto-wire declarations.
+     */
+    private $autowires = [];
+    /**
+     * @var array<string, string> list of entity IDs, which currently in resolution.
+     * Used to track circular dependencies.
+     */
+    private $resolving = [];
 
     /**
      * {@inheritdoc}
      */
     public function get(string $id)
+    {
+        if (isset($this->resolving[$id])) {
+            throw new CircularDependencyException($this->resolving);
+        }
+
+        $this->resolving[$id] = $id;
+
+        $entity = $this->resolve($id);
+
+        unset($this->resolving[$id]);
+
+        return $entity;
+    }
+
+    /**
+     * Resolves stored entity.
+     *
+     * @param string $id entity ID.
+     * @return mixed resolved entity.
+     */
+    protected function resolve(string $id)
     {
         if (isset($this->instances[$id])) {
             return $this->instances[$id];
@@ -43,6 +71,13 @@ class Container implements ContainerInterface
         if (isset($this->definitions[$id])) {
             $this->instances[$id] = call_user_func($this->definitions[$id], $this);
             unset($this->definitions[$id]);
+
+            return $this->instances[$id];
+        }
+
+        if (isset($this->autowires[$id])) {
+            $this->instances[$id] = $this->getInjector()->make($this, $this->autowires[$id]);
+            unset($this->autowires[$id]);
 
             return $this->instances[$id];
         }
@@ -75,6 +110,10 @@ class Container implements ContainerInterface
             return true;
         }
 
+        if (isset($this->autowires[$id])) {
+            return true;
+        }
+
         if ($id === get_class($this)) {
             return true;
         }
@@ -84,6 +123,16 @@ class Container implements ContainerInterface
         }
 
         return false;
+    }
+
+    /**
+     * Returns injector instance used for internal dependency resolution.
+     *
+     * @return \yii1tech\di\InjectorContract internal injector instance.
+     */
+    protected function getInjector(): InjectorContract
+    {
+        return new Injector();
     }
 
     /**
@@ -155,6 +204,40 @@ class Container implements ContainerInterface
     public function factory(string $id, callable $callable): self
     {
         $this->factories[$id] = $callable;
+
+        return $this;
+    }
+
+    /**
+     * Specifies binding as a class name, which instance should be automatically resolved based on constructor
+     * arguments type-hinting, using this container as their source.
+     * For example:
+     *
+     * ```php
+     * class DbCache implements ICache
+     * {
+     *     public function __construct(CDbConnection $db)
+     *     {
+     *         // ...
+     *     }
+     * }
+     *
+     * $container->lazy(CDbConnection::class, function () {
+     *     // ...
+     * });
+     *
+     * $container->autowire(ICache::class, DbCache::class);
+     * ```
+     *
+     * > Note: simplicity of this method approach comes with reduced performance, its usage is not recommended.
+     *
+     * @param string $id identifier of the entry.
+     * @param string|null $class actual entry class, if not set entry ID will be used.
+     * @return static self reference.
+     */
+    public function autowire(string $id, ?string $class = null): self
+    {
+        $this->autowires[$id] = $class ?? $id;
 
         return $this;
     }
