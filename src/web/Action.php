@@ -10,24 +10,14 @@ use yii1tech\di\DI;
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
  */
-class InlineAction extends \CInlineAction
+class Action extends \CAction
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function run()
-    {
-        $this->runWithParams([]);
-    }
-
     /**
      * {@inheritdoc}
      */
     public function runWithParams($params)
     {
-        $method = 'action' . $this->getId();
-
-        DI::invoke([$this->getController(), $method], $params);
+        DI::invoke([$this, 'run'], $params);
 
         return true;
     }

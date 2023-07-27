@@ -3,10 +3,12 @@
 namespace web;
 
 use CDummyCache;
+use CFormatter;
 use ICache;
 use Yii;
 use yii1tech\di\Container;
 use yii1tech\di\DI;
+use yii1tech\di\test\support\controllers\ExternalAction;
 use yii1tech\di\test\support\controllers\NamespaceController;
 use yii1tech\di\test\TestCase;
 use yii1tech\di\web\WebApplication;
@@ -28,8 +30,9 @@ class WebApplicationTest extends TestCase
         );
 
         $container = new Container();
-        $cache = new CDummyCache();
-        $container->instance(ICache::class, $cache);
+
+        $container->instance(ICache::class, new CDummyCache());
+        $container->instance(CFormatter::class, new CFormatter());
 
         DI::setContainer($container);
     }
@@ -41,6 +44,8 @@ class WebApplicationTest extends TestCase
     {
         unset($GLOBALS['controller']);
         unset($GLOBALS['method']);
+
+        $_GET = [];
 
         parent::tearDown();
     }
@@ -100,5 +105,48 @@ class WebApplicationTest extends TestCase
         $this->assertSame('actionIndex', $GLOBALS['method']);
         $this->assertSame('namespace', $controller->id);
         $this->assertSame(null, $controller->module);
+    }
+
+    /**
+     * @depends testCreateController
+     */
+    public function testRunActionWithParams(): void
+    {
+        $_GET['id'] = 123;
+
+        Yii::app()->runController('plain/format');
+
+        $this->assertTrue(isset($GLOBALS['controller']));
+
+        /** @var \PlainController $controller */
+        $controller = $GLOBALS['controller'];
+        $this->assertTrue($controller instanceof \PlainController);
+
+        $this->assertTrue($controller->formatter instanceof CFormatter);
+
+        $this->assertTrue(isset($GLOBALS['id']));
+        $this->assertEquals($_GET['id'], $GLOBALS['id']);
+    }
+
+    /**
+     * @depends testCreateController
+     */
+    public function testRunExternalAction(): void
+    {
+        $_GET['id'] = 123;
+
+        Yii::app()->runController('plain/external');
+
+        $this->assertTrue(isset($GLOBALS['controller']));
+        $this->assertTrue(isset($GLOBALS['action']));
+
+        /** @var ExternalAction $action */
+        $action = $GLOBALS['action'];
+        $this->assertTrue($action instanceof ExternalAction);
+        $this->assertTrue($action->cache instanceof ICache);
+        $this->assertTrue($action->formatter instanceof CFormatter);
+
+        $this->assertTrue(isset($GLOBALS['id']));
+        $this->assertEquals($_GET['id'], $GLOBALS['id']);
     }
 }
