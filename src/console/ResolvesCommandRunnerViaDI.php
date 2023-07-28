@@ -5,6 +5,8 @@ namespace yii1tech\di\console;
 use yii1tech\di\DI;
 
 /**
+ * ResolvesCommandRunnerViaDI bootstraps DI aware command runner to the console application.
+ *
  * @mixin \CConsoleApplication
  *
  * @author Paul Klimov <klimov.paul@gmail.com>
