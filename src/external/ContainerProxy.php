@@ -13,13 +13,13 @@ use Psr\Container\ContainerInterface;
  * For example:
  *
  * ```php
- * class PhpDiContainerProxy extends ContainerProxy
- * {
- *     public function has(string $id): bool
- *     {
- *         return in_array($id, $this->container->getKnownEntryNames(), true);
- *     }
- * }
+ * use DI\Container;
+ * use yii1tech\di\external\ContainerProxy;
+ *
+ * $container = ContainerProxy::new(new Container())
+ *     ->setCallbackForHas(function (Container $container, string $id) {
+ *         return in_array($id, $container->getKnownEntryNames(), true);
+ *     });
  * ```
  *
  * @author Paul Klimov <klimov.paul@gmail.com>
@@ -31,6 +31,14 @@ class ContainerProxy implements ContainerInterface
      * @var \Psr\Container\ContainerInterface wrapped container instance.
      */
     protected $container;
+    /**
+     * @var callable|null PHP callback, which should be used to implement `get()` method.
+     */
+    protected $callbackForGet;
+    /**
+     * @var callable|null PHP callback, which should be used to implement `has()` method.
+     */
+    protected $callbackForHas;
 
     /**
      * Constructor.
@@ -47,7 +55,11 @@ class ContainerProxy implements ContainerInterface
      */
     public function get(string $id)
     {
-        return $this->container->get($id);
+        if ($this->callbackForGet === null) {
+            return $this->container->get($id);
+        }
+
+        return call_user_func($this->callbackForGet, $this->container, $id);
     }
 
     /**
@@ -55,7 +67,47 @@ class ContainerProxy implements ContainerInterface
      */
     public function has(string $id): bool
     {
-        return $this->container->has($id);
+        if ($this->callbackForHas == null) {
+            return $this->container->has($id);
+        }
+
+        return call_user_func($this->callbackForHas, $this->container, $id);
+    }
+
+    /**
+     * Specifies a PHP callback, which should be invoked to implement method `get()`.
+     * The callback signature:
+     *
+     * ```
+     * function (\Psr\Container\ContainerInterface $container, string $id): mixed
+     * ```
+     *
+     * @param callable|null $callback PHP callback.
+     * @return static self reference.
+     */
+    public function setCallbackForGet(?callable $callback): self
+    {
+        $this->callbackForGet = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Specifies a PHP callback, which should be invoked to implement method `has()`.
+     * The callback signature:
+     *
+     * ```
+     * function (\Psr\Container\ContainerInterface $container, string $id): bool
+     * ```
+     *
+     * @param callable|null $callback PHP callback.
+     * @return static self reference.
+     */
+    public function setCallbackForHas(?callable $callback): self
+    {
+        $this->callbackForHas = $callback;
+
+        return $this;
     }
 
     /**

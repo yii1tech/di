@@ -46,4 +46,44 @@ class ContainerProxyTest extends TestCase
 
         $this->assertTrue($proxy->has(ArrayObject::class));
     }
+
+    /**
+     * @depends testHas
+     */
+    public function testCallbackForHas(): void
+    {
+        $container = new Container();
+
+        $proxy = new ContainerProxy($container);
+        $proxy->setCallbackForHas(function (Container $container, $id) {
+            return $id === ArrayObject::class;
+        });
+
+        $this->assertTrue($proxy->has(ArrayObject::class));
+        $this->assertFalse($proxy->has('unexistint-id'));
+    }
+
+    /**
+     * @depends testGet
+     */
+    public function testCallbackForGet(): void
+    {
+        $container = new Container();
+
+        $proxy = new ContainerProxy($container);
+        $proxy->setCallbackForGet(function (Container $container, $id) {
+            if ($id === ArrayObject::class) {
+                return new ArrayObject();
+            }
+
+            return null;
+        });
+
+        $object = $proxy->get(ArrayObject::class);
+
+        $this->assertTrue($object instanceof ArrayObject);
+
+        $object = $proxy->get('any');
+        $this->assertNull($object);
+    }
 }
