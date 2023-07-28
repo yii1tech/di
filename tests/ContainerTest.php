@@ -144,4 +144,11 @@ class ContainerTest extends TestCase
 
         $container->get('one');
     }
+
+    public function testNew(): void
+    {
+        $container = Container::new();
+
+        $this->assertTrue($container instanceof Container);
+    }
 }

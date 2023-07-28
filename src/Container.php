@@ -291,4 +291,16 @@ class Container implements ContainerInterface
 
         return $this;
     }
+
+    /**
+     * Creates new self instance.
+     * This method can be useful when writing chain methods calls.
+     *
+     * @param mixed ...$args constructor arguments.
+     * @return static new self instance.
+     */
+    public static function new(...$args): self
+    {
+        return new static(...$args);
+    }
 }
