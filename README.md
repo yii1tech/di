@@ -38,14 +38,65 @@ to the "require" section of your composer.json.
 Usage
 -----
 
-This extension provides Dependency Injection support for Yii1 application.
+This extension provides Dependency Injection support for Yii1 application using [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible container.
+
+This extension introduces static facade class `\yii1tech\di\DI`, which provides global access to PSR container nad injector.
+All dependency injection features provided in this extension relies on this facade.
+It provides easy way for container entity retrieval and dependency injection.
+For example:
+
+```php
+<?php
+
+use yii1tech\di\DI;
+
+class Foo
+{
+    /**
+     * @var CDbConnection
+     */
+    public $db;
+    
+    /**
+     * @var string 
+     */
+    public $name = 'default';
+    
+    public function __construct(CDbConnection $db)
+    {
+        $this->db = $db;
+    }
+    
+    public function format(CFormatter $formatter, string $value): string
+    {
+        return $formatter->formatDate($value);
+    }
+}
+
+$psrContainer = DI::container(); // retrieve related PSR compatible container
+var_dump($psrContainer instanceof \Psr\Container\ContainerInterface); // outputs `true`
+
+$db = DI::get(CDbConnection::class); // retrieve entity from PSR compatible container
+
+$object = DI::make(Foo::class); // instantiates object, resolving constructor arguments from PSR compatible container based on type-hints
+var_dump($object->db instanceof CDbConnection); // outputs `true`
+
+$date = DI::invoke([$object, 'format'], [time()]); // invokes given callback, resolving its arguments from PSR compatible container based on type-hints
+var_dump($date); // outputs '2023/07/28'
+
+$object = DI::create([ // instantiates object from Yii-style configuration, resolving constructor arguments from PSR compatible container based on type-hints
+    'class' => Foo::class,
+    'name' => 'custom',
+]);
+var_dump($object->db instanceof CDbConnection); // outputs `true`
+var_dump($object->name); // outputs `custom`
+```
 
 
 ### Container Setup <span id="container-setup"></span>
 
-This extension introduces static facade class `\yii1tech\di\DI`, which provides global access to PSR container nad injector.
-All dependency injection features provided in this extension relies on this facade.
-The dependency injection container should be set at the Yii bootstrap stage before the application run.
+The actual dependency injection container should be set via `\yii1tech\di\DI::setContainer()` method.
+It should be done at the Yii bootstrap stage **before** the application created.
 For example:
 
 ```php
@@ -201,8 +252,92 @@ entity via factory, but in most cases it will cause you trouble.
 
 ### Dependency Injection in Web Application <span id="di-in-web-application"></span>
 
+This extension allows injection of DI container entities into controller constructors and action methods based on arguments' type-hints.
+However, this feature will not work on standard controllers extended directly from `CController` - you'll need to extend `\yii1tech\di\web\Controller`
+class or use `\yii1tech\di\web\ResolvesActionViaDI` trait.
+For example:
+
+```php
+<?php
+
+use yii1tech\di\web\Controller;
+
+class ItemController extends Controller
+{
+    /**
+     * @var CDbConnection 
+     */
+    protected $db;
+    
+    // injects `CDbConnection` from DI container at constructor level
+    public function __construct(CDbConnection $db, $id, $module = null)
+    {
+        parent::__construct($id, $module); // do not forget to invoke parent constructor
+        
+        $this->db = $db;
+    }
+    
+    // injects `ICache` from DI container at action level
+    public function actionIndex(ICache $cache)
+    {
+        // ...
+    }
+    
+    // injects `ICache` from DI container at action level, populates `$id` from `$_GET`
+    public function actionView(ICache $cache, $id)
+    {
+        // ...
+    }
+}
+```
+
+**Heads up!** While declaring your own controller's constructor make sure it accepts parent's arguments `$id` and `$module`
+and passes them to the parent constructor. Otherwise, controller may not function properly.
+
 
 ### Dependency Injection in Console Application <span id="di-in-console-application"></span>
+
+This extension allows injection of DI container entities into console commands constructors and action methods based on arguments' type-hints.
+However, this feature will not work on standard console commands extended directly from `CConsoleCommand` - you'll need to extend
+`\yii1tech\di\console\ConsoleCommand` class or use `\yii1tech\di\console\ResolvesActionViaDI` trait.
+For example:
+
+```php
+<?php
+
+use yii1tech\di\console\ConsoleCommand;
+
+class ItemCommand extends ConsoleCommand
+{
+    /**
+     * @var CDbConnection 
+     */
+    protected $db;
+    
+    // injects `CDbConnection` from DI container at constructor level
+    public function __construct(CDbConnection $db, $name, $runner)
+    {
+        parent::__construct($name, $runner); // do not forget to invoke parent constructor
+
+        $this->db = $db;
+    }
+    
+    // injects `ICache` from DI container at action level
+    public function actionIndex(ICache $cache)
+    {
+        // ...
+    }
+    
+    // injects `CFormatter` from DI container at action level, populates `$date` from shell arguments
+    public function actionFormat(CFormatter $formatter, $date)
+    {
+        // ...
+    }
+}
+```
+
+**Heads up!** While declaring your own console command's constructor make sure it accepts parent's arguments `$name` and `$runner`
+and passes them to the parent constructor. Otherwise, console command may not function properly.
 
 
 ### External (3rd party) Container Usage <span id="external-contatiner-usage"></span>

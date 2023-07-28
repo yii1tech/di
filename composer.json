@@ -1,7 +1,7 @@
 {
     "name": "yii1tech/di",
     "description": "Provides Dependency Injection support for Yii1 application",
-    "keywords": ["yii1", "psr", "container", "di", "dependency", "injection"],
+    "keywords": ["yii1", "psr", "container", "di", "dependency", "injection", "psr-11"],
     "license": "BSD-3-Clause",
     "support": {
         "issues": "https://github.com/yii1tech/di/issues",
