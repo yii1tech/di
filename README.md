@@ -40,7 +40,7 @@ Usage
 
 This extension provides Dependency Injection support for Yii1 application using [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible container.
 
-This extension introduces static facade class `\yii1tech\di\DI`, which provides global access to PSR container nad injector.
+This extension introduces static facade class `\yii1tech\di\DI`, which provides global access to PSR container and injector.
 All dependency injection features provided in this extension relies on this facade.
 It provides easy way for container entity retrieval and dependency injection.
 For example:
@@ -56,7 +56,6 @@ class Foo
      * @var CDbConnection
      */
     public $db;
-    
     /**
      * @var string 
      */
@@ -81,7 +80,7 @@ $db = DI::get(CDbConnection::class); // retrieve entity from PSR compatible cont
 $object = DI::make(Foo::class); // instantiates object, resolving constructor arguments from PSR compatible container based on type-hints
 var_dump($object->db instanceof CDbConnection); // outputs `true`
 
-$date = DI::invoke([$object, 'format'], [time()]); // invokes given callback, resolving its arguments from PSR compatible container based on type-hints
+$date = DI::invoke([$object, 'format'], ['value' => time()]); // invokes given callback, resolving its arguments from PSR compatible container based on type-hints
 var_dump($date); // outputs '2023/07/28'
 
 $object = DI::create([ // instantiates object from Yii-style configuration, resolving constructor arguments from PSR compatible container based on type-hints
@@ -96,7 +95,7 @@ var_dump($object->name); // outputs `custom`
 ### Container Setup <span id="container-setup"></span>
 
 The actual dependency injection container should be set via `\yii1tech\di\DI::setContainer()` method.
-It should be done at the Yii bootstrap stage **before** the application created.
+It should be done at the Yii bootstrap stage **before** the application is created.
 For example:
 
 ```php
@@ -165,7 +164,7 @@ class ContainerFactory
 ### Dependency Injection for Application Components <span id="di-for-application-components"></span>
 
 This extension allows configuration of the Application (Service Locator) components via DI container.
-In order to make it work you need use one of application classes provided within this extension - feature will not function
+In order to make it work, you need to use one of application classes provided within this extension - feature will not function
 automatically on the standard ones.
 
 Following classes are provided:
@@ -175,7 +174,7 @@ Following classes are provided:
 - `\yii1tech\di\base\Module` - DI aware Module.
 - `\yii1tech\di\web\WebModule` - DI aware Web Module.
 
-If you use your own custom application class, you may apply DI component resolution ot it using `\yii1tech\di\base\ResolvesComponentViaDI` trait.
+If you use your own custom application class, you may apply DI component resolution to it using `\yii1tech\di\base\ResolvesComponentViaDI` trait.
 
 For example:
 
@@ -194,7 +193,7 @@ DI::setContainer(/* ... */);
 Yii::createApplication(WebApplication::class, $config)->run();
 ```
 
-Being DI-aware application will resolve configured components via DI Container according to their configured class.
+Being DI-aware, application will resolve configured components via DI Container according to their configured class.
 This allows you moving configuration into DI Container from Service Locator without breaking anything.
 For example:
 
@@ -254,12 +253,15 @@ var_dump(get_class($cache)); // outputs 'CDbCache'
 ```
 
 **Heads up!** Be careful while moving Yii component definitions into DI container: remember to invoke method `init()` manually on them.
-Yii often places crucial initialization logic into component's `init()`, if you omit its invocation you may receive broken component instance
-while fetching it directly from container.
+Yii often places crucial initialization logic into component's `init()`, if you omit its invocation you may receive broken component instance,
+while fetching it directly from the container.
 
 **Heads up!** If you move application component config to DI container, make sure to clean up its original configuration at Service Locator.
-Any "property value" definition remaining, will be applied to the object fetched from container. It may be useful hen you define container
+Any remaining "property-value" definition will be applied to the object fetched from container. It may be useful, when you define container
 entity via factory, but in most cases it will cause you trouble.
+
+> Tip: component placed into Yii Application (Service Locator) via DI container is not required to implement `\IApplicationComponent` interface,
+  since method `init()` will never be automatically invoked on it.
 
 
 ### Dependency Injection in Web Application <span id="di-in-web-application"></span>
@@ -303,7 +305,7 @@ class ItemController extends Controller
 }
 ```
 
-**Heads up!** While declaring your own controller's constructor make sure it accepts parent's arguments `$id` and `$module`
+**Heads up!** While declaring your own controller's constructor, make sure it accepts parent's arguments `$id` and `$module`
 and passes them to the parent constructor. Otherwise, controller may not function properly.
 
 
@@ -348,7 +350,7 @@ class ItemCommand extends ConsoleCommand
 }
 ```
 
-**Heads up!** While declaring your own console command's constructor make sure it accepts parent's arguments `$name` and `$runner`
+**Heads up!** While declaring your own console command's constructor, make sure it accepts parent's arguments `$name` and `$runner`
 and passes them to the parent constructor. Otherwise, console command may not function properly.
 
 
@@ -382,7 +384,7 @@ Yii::createApplication(WebApplication::class, $config)->run();
 ```
 
 Many existing PSR-11 compatible solutions are coming with built-in injection mechanism, which you may want to utilize instead of the one,
-provided by this extension. In order to do this you should create your own injector, implementing `\yii1tech\di\InjectorContract` interface,
+provided by this extension. In order to do this, you should create your own injector, implementing `\yii1tech\di\InjectorContract` interface,
 and pass it to `\yii1tech\di\DI::setInjector()`.
 
 Many of the existing PSR-11 containers (including the 'PHP-DI') already implements dependency injection methods `make()` and `call()`.
@@ -405,15 +407,15 @@ DI::setContainer(function () {
     
     return $builder->build();
 })
-    ->setInjector(new ContainerBasedInjector()); // use `DI\Container::make()` and `DI\Container::call()` for dependency injection
+    ->setInjector(new ContainerBasedInjector()); // use `\DI\Container::make()` and `\DI\Container::call()` for dependency injection
 
 // create and run Yii DI-aware application:
 Yii::createApplication(WebApplication::class, $config)->run();
 ```
 
 **Heads up!** Many of the existing PSR-11 containers, which provide built-in injection methods, implements method `\Psr\Container\ContainerInterface::has()`
-in inconsistent way. While standard demands it should return `true` only if there is explicit binding inside the container, many solutions return
-`true` even if binding does not exist, but requested class **can be** resolved, e.g. its constructor arguments can be filled up using other bindings
+in inconsistent way. While standard demands: it should return `true` only, if there is explicit binding inside the container - many solutions return
+`true` even, if binding does not exist, but requested class **can be** resolved, e.g. its constructor arguments can be filled up using other bindings
 from container. Such check is always comes with extra class and method reflection creation, which reduces the overall performance. This may cause a
 significant impact, while resolving Yii application components via DI container.
 
