@@ -14,6 +14,7 @@ class ConsoleApplication extends \CConsoleApplication
 {
     use ResolvesComponentViaDI;
     use ResolvesCommandRunnerViaDI;
+    use MatchesWebApplicationNotation;
 
     /**
      * @var string|null namespace that should be used when loading commands.
