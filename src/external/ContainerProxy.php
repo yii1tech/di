@@ -171,6 +171,17 @@ class ContainerProxy implements ContainerInterface
     }
 
     /**
+     * Clones wrapped container instance.
+     * Do not call this method. This is a PHP magic method that invoked automatically after object has been cloned.
+     *
+     * @since 1.0.1
+     */
+    public function __clone()
+    {
+        $this->container = clone $this->container;
+    }
+
+    /**
      * Creates new self instance.
      * This method can be useful when writing chain methods calls.
      *

@@ -86,4 +86,26 @@ class ContainerProxyTest extends TestCase
         $object = $proxy->get('any');
         $this->assertNull($object);
     }
+
+    /**
+     * @depends testForwardCall
+     */
+    public function testClone(): void
+    {
+        $container = new Container();
+
+        $proxy = new ContainerProxy($container);
+
+        $proxy->instance('before-clone', 'before-clone-data');
+
+        $proxyClone = clone $proxy;
+
+        $proxyClone->instance('after-clone', 'after-clone-data');
+
+        $this->assertTrue($proxyClone->has('before-clone'));
+        $this->assertTrue($proxyClone->has('after-clone'));
+
+        $this->assertTrue($proxy->has('before-clone'));
+        $this->assertFalse($proxy->has('after-clone'));
+    }
 }
