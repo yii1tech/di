@@ -1,8 +1,8 @@
 Yii1 Dependency Injection extension
 ===================================
 
-1.0.1 Under Development
------------------------
+1.0.1, August 3, 2023
+---------------------
 
 - Bug: Fixed `ContainerProxy` does not clones wrapped container on its own cloning (klimov-paul)
 
