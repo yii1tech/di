@@ -128,37 +128,50 @@ trait ResolvesActionViaDI
         foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             $name = $method->getName();
             if (!strncasecmp($name, 'action', 6) && strlen($name) > 6) {
-                $name = substr($name, 6);
-                $name[0] = strtolower($name[0]);
-                $help = $name;
-
-                foreach ($method->getParameters() as $param) {
-                    if ($param->hasType() && !$param->getType()->isBuiltin()) {
-                        continue;
-                    }
-
-                    $optional = $param->isDefaultValueAvailable();
-                    $defaultValue = $optional ? $param->getDefaultValue() : null;
-                    if (is_array($defaultValue)) {
-                        $defaultValue = str_replace(["\r\n", "\n", "\r"], '', print_r($defaultValue, true));
-                    }
-                    $name = $param->getName();
-
-                    if ($name === 'args') {
-                        continue;
-                    }
-
-                    if ($optional) {
-                        $help .= " [--$name=$defaultValue]";
-                    } else {
-                        $help .= " --$name=value";
-                    }
-                }
-
-                $options[] = $help;
+                $options[] = $this->buildActionHelp($method);
             }
         }
 
         return $options;
+    }
+
+    /**
+     * Builds help text for the particular console command action.
+     *
+     * @since 1.0.2
+     *
+     * @param \ReflectionMethod $method action method reflection.
+     * @return string help text.
+     */
+    protected function buildActionHelp(ReflectionMethod $method): string
+    {
+        $name = substr($method->getName(), 6);
+        $name[0] = strtolower($name[0]);
+        $help = $name;
+
+        foreach ($method->getParameters() as $param) {
+            if ($param->hasType() && !$param->getType()->isBuiltin()) {
+                continue;
+            }
+
+            $optional = $param->isDefaultValueAvailable();
+            $defaultValue = $optional ? $param->getDefaultValue() : null;
+            if (is_array($defaultValue)) {
+                $defaultValue = str_replace(["\r\n", "\n", "\r"], '', print_r($defaultValue, true));
+            }
+            $name = $param->getName();
+
+            if ($name === 'args') {
+                continue;
+            }
+
+            if ($optional) {
+                $help .= " [--$name=$defaultValue]";
+            } else {
+                $help .= " --$name=value";
+            }
+        }
+
+        return $help;
     }
 }
