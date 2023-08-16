@@ -81,7 +81,7 @@ class ModuleTest extends TestCase
         $this->assertSame(1, $counter);
     }
 
-    public function setArbitraryComponent(): void
+    public function testSetArbitraryComponent(): void
     {
         $module = new Module('test', Yii::app());
 
@@ -90,5 +90,35 @@ class ModuleTest extends TestCase
 
         $this->assertTrue($module->hasComponent('test'));
         $this->assertSame($component, $module->getComponent('test'));
+    }
+
+    public function testGetNotExistingComponent(): void
+    {
+        $module = new Module('test', Yii::app());
+
+        $component = $module->getComponent('not-existing');
+
+        $this->assertNull($component);
+    }
+
+    /**
+     * @depends testGetComponent
+     */
+    public function testSetComponentByString(): void
+    {
+        $container = new Container();
+        $cache = new CDummyCache();
+        $container->instance(ICache::class, $cache);
+
+        DI::setContainer($container);
+
+        $module = new Module('test', Yii::app(), [
+            'components' => [
+                'cache' => ICache::class,
+            ],
+        ]);
+
+        $component = $module->getComponent('cache', true);
+        $this->assertSame($cache, $component);
     }
 }

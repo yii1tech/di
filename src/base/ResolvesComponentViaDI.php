@@ -75,11 +75,23 @@ trait ResolvesComponentViaDI
      * Works only if component has not been initialized yet.
      *
      * @param string $id component ID.
-     * @return array component configuration.
+     * @return array|null component configuration.
      */
-    private function getComponentConfig($id): array
+    private function getComponentConfig($id): ?array
     {
-        return parent::getComponents(false)[$id];
+        $config = parent::getComponents(false)[$id] ?? null;
+
+        if ($config === null) {
+            return null;
+        }
+
+        if (!is_array($config)) {
+            $config = [
+                'class' => $config,
+            ];
+        }
+
+        return $config;
     }
 
     /**
@@ -108,7 +120,7 @@ trait ResolvesComponentViaDI
     public function setComponent($id, $component, $merge = true): void
     {
         if (is_object($component) && !$component instanceof IApplicationComponent) {
-            $this->_diComponents = $component;
+            $this->_diComponents[$id] = $component;
 
             return;
         }
