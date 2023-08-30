@@ -1,8 +1,8 @@
 Yii1 Dependency Injection extension
 ===================================
 
-1.0.3 Under Development
------------------------
+1.0.3, August 30, 2023
+----------------------
 
 - Bug: Fixed `DI::create()` unable to handle Yii-style class alias (klimov-paul)
 - Bug: Fixed controller action invocation with wrong set of arguments results in 500 error instead of 400 (klimov-paul)
