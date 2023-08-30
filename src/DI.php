@@ -175,6 +175,10 @@ class DI
             throw new CException(Yii::t('yii', 'Object configuration must be an array containing a "class" element.'));
         }
 
+        if (!class_exists($class, false)) {
+            $class = Yii::import($class, true);
+        }
+
         $object = static::make($class, $arguments);
 
         foreach ($config as $name => $value) {

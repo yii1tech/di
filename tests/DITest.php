@@ -98,6 +98,18 @@ class DITest extends TestCase
     }
 
     /**
+     * @depends testCreate
+     */
+    public function testCreateWithYiiImport(): void
+    {
+        $object = DI::create([
+            'class' => 'zii.behaviors.CTimestampBehavior',
+        ]);
+
+        $this->assertFalse(empty($object));
+    }
+
+    /**
      * @depends testSetupContainer
      */
     public function testHas(): void
