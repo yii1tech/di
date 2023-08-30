@@ -108,8 +108,10 @@ class DI
     /**
      * Finds an entry of the decorated container by its identifier and returns it.
      *
-     * @param string $id identifier of the entry to look for.
-     * @return mixed entry.
+     * @template T
+     *
+     * @param string|class-string<T> $id identifier of the entry to look for.
+     * @return mixed|T entry.
      * @throws \Psr\Container\ContainerExceptionInterface no entry was found for **this** identifier.
      * @throws \Psr\Container\NotFoundExceptionInterface error while retrieving the entry.
      */
@@ -133,9 +135,11 @@ class DI
     /**
      * Invoke a callback with resolving dependencies based on parameter types.
      *
-     * @param callable $callable callable to be invoked.
+     * @template T
+     *
+     * @param (callable():T) $callable callable to be invoked.
      * @param array $arguments list of function arguments.
-     * @return mixed invocation result.
+     * @return mixed|T invocation result.
      */
     public static function invoke(callable $callable, array $arguments = [])
     {
@@ -145,9 +149,11 @@ class DI
     /**
      * Creates an object of a given class with resolving constructor dependencies based on parameter types.
      *
-     * @param string $class class name.
+     * @template T
+     *
+     * @param string|class-string<T> $class class name.
      * @param array $arguments list of constructor arguments.
-     * @return mixed created class instance.
+     * @return mixed|T created class instance.
      */
     public static function make(string $class, array $arguments = [])
     {
@@ -158,9 +164,11 @@ class DI
      * Creates an object from the Yii-style configuration with resolving constructor dependencies based on parameter types.
      * @see \YiiBase::createComponent()
      *
-     * @param array|string $config the configuration. It can be either a string or an array.
+     * @template T
+     *
+     * @param array|string|class-string<T> $config the configuration. It can be either a string or an array.
      * @param array $arguments list of constructor arguments.
-     * @return mixed the created object.
+     * @return mixed|T the created object.
      * @throws \CException on invalid configuration.
      */
     public static function create($config, array $arguments = [])
