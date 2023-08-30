@@ -4,6 +4,7 @@ namespace yii1tech\di\test\web;
 
 use CDummyCache;
 use CFormatter;
+use CHttpException;
 use ICache;
 use Yii;
 use yii1tech\di\Container;
@@ -116,6 +117,21 @@ class WebApplicationTest extends TestCase
     }
 
     /**
+     * @depends testRunActionWithParams
+     */
+    public function testRunActionWithMissingParams(): void
+    {
+        try {
+            Yii::app()->runController('plain/format');
+        } catch (CHttpException $exception) {
+            // blank
+        }
+
+        $this->assertTrue(isset($exception));
+        $this->assertEquals(400, $exception->statusCode);
+    }
+
+    /**
      * @depends testCreateController
      */
     public function testRunExternalAction(): void
@@ -135,5 +151,20 @@ class WebApplicationTest extends TestCase
 
         $this->assertTrue(isset($GLOBALS['id']));
         $this->assertEquals($_GET['id'], $GLOBALS['id']);
+    }
+
+    /**
+     * @depends testRunExternalAction
+     */
+    public function testRunExternalActionWithMissingParams(): void
+    {
+        try {
+            Yii::app()->runController('plain/external');
+        } catch (CHttpException $exception) {
+            // blank
+        }
+
+        $this->assertTrue(isset($exception));
+        $this->assertEquals(400, $exception->statusCode);
     }
 }

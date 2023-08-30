@@ -5,6 +5,7 @@ Yii1 Dependency Injection extension
 -----------------------
 
 - Bug: Fixed `DI::create()` unable to handle Yii-style class alias (klimov-paul)
+- Bug: Fixed controller action invocation with wrong set of arguments results in 500 error instead of 400 (klimov-paul)
 
 
 1.0.2, August 16, 2023

@@ -2,8 +2,6 @@
 
 namespace yii1tech\di\web;
 
-use yii1tech\di\DI;
-
 /**
  * {@inheritdoc}
  *
@@ -12,13 +10,5 @@ use yii1tech\di\DI;
  */
 class Action extends \CAction
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function runWithParams($params)
-    {
-        DI::invoke([$this, 'run'], $params);
-
-        return true;
-    }
+    use RunsActionWithParamsViaDI;
 }

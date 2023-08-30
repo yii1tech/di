@@ -2,8 +2,6 @@
 
 namespace yii1tech\di\web;
 
-use yii1tech\di\DI;
-
 /**
  * {@inheritdoc}
  *
@@ -12,23 +10,13 @@ use yii1tech\di\DI;
  */
 class InlineAction extends \CInlineAction
 {
+    use RunsActionWithParamsViaDI;
+
     /**
      * {@inheritdoc}
      */
     public function run()
     {
         $this->runWithParams([]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function runWithParams($params)
-    {
-        $method = 'action' . $this->getId();
-
-        DI::invoke([$this->getController(), $method], $params);
-
-        return true;
     }
 }

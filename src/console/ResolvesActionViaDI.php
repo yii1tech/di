@@ -42,7 +42,7 @@ trait ResolvesActionViaDI
         $params = [];
         $arguments = [];
         // named and unnamed options
-        foreach ($method->getParameters() as $i => $param) {
+        foreach ($method->getParameters() as $param) {
             $name = $param->getName();
 
             if ($param->hasType() && !$param->getType()->isBuiltin()) {
