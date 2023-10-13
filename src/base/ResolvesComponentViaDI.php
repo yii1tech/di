@@ -125,6 +125,10 @@ trait ResolvesComponentViaDI
             return;
         }
 
+        if (isset($this->_diComponents[$id])) {
+            unset($this->_diComponents[$id]);
+        }
+
         parent::setComponent($id, $component, $merge);
     }
 }

@@ -1,6 +1,12 @@
 Yii1 Dependency Injection extension
 ===================================
 
+1.0.4 Under Development
+-----------------------
+
+- Bug: Fixed `Module::setComponent()` unable to override component resolved from DI container (klimov-paul)
+
+
 1.0.3, August 30, 2023
 ----------------------
 

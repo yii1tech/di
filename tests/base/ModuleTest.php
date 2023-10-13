@@ -121,4 +121,31 @@ class ModuleTest extends TestCase
         $component = $module->getComponent('cache', true);
         $this->assertSame($cache, $component);
     }
+
+    /**
+     * @depends testGetComponent
+     */
+    public function testOverrideResolvedComponent(): void
+    {
+        $container = new Container();
+        $cache = new CDummyCache();
+        $container->instance(ICache::class, $cache);
+
+        DI::setContainer($container);
+
+        $module = new Module('test', Yii::app(), [
+            'components' => [
+                'cache' => [
+                    'class' => ICache::class,
+                ],
+            ],
+        ]);
+
+        $resolvedComponent = $module->getComponent('cache');
+
+        $newComponent = new CDummyCache();
+        $module->setComponent('cache', $newComponent, false);
+
+        $this->assertSame($newComponent, $module->getComponent('cache'));
+    }
 }
