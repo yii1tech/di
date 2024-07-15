@@ -24,6 +24,18 @@ trait RunsActionWithParamsViaDI
             $name = $param->getName();
 
             if ($param->hasType() && !$param->getType()->isBuiltin()) {
+                if ($param->getType()->getName() == \CWebUser::class) {
+                    $arguments[$name] = \Yii::app()->getUser();
+
+                    continue;
+                }
+
+                if ($param->getType()->getName() == \CHttpRequest::class) {
+                    $arguments[$name] = \Yii::app()->getRequest();
+
+                    continue;
+                }
+
                 if (is_subclass_of($param->getType()->getName(), \CActiveRecord::class) && array_key_exists('id', $params)) {
                     $arguments[$name] = ($param->getType()->getName())::model()->findByPk($params['id']);
 
